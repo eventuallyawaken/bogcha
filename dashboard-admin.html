@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Kindergarten</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<script>
+  (async function verifySession() {
+    const backupU = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!backupU || backupU.role === 'parent') { window.location.href = 'login.html'; return; }
+    try {
+        const res = await fetch('backend/check_auth.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success || data.user.role === 'parent') {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    } catch(e) {}
+  })();
+</script>
+
+<div class="dashboard-layout">
+  <!-- ============================================================ SIDEBAR ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <div class="sidebar__logo">
+        <div class="sidebar__logo-icon">🏫</div>
+        <span>Admin Panel</span>
+      </div>
+      <button class="sidebar__close" id="sidebarClose" title="Yopish">✕</button>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="sidebar__section-title">Asosiy</div>
+      <a href="#" class="active" data-tab="home"><span class="nav-icon">📊</span> <span data-lang="admin_dash">Bosh sahifa</span></a>
+      <a href="#" data-tab="attendance"><span class="nav-icon">✅</span> <span data-lang="admin_att">Davomat olish</span></a>
+      <a href="#" data-tab="cameras"><span class="nav-icon">📹</span> <span data-lang="admin_cameras">Barcha kameralar</span></a>
+      <div class="sidebar__section-title" style="margin-top:8px">Boshqaruv</div>
+      <a href="#" data-tab="users"><span class="nav-icon">👥</span> <span>Foydalanuvchilar</span></a>
+      <a href="#" data-tab="broadcast"><span class="nav-icon">📢</span> <span data-lang="admin_notify">Bildirishnoma</span></a>
+      <a href="#" data-tab="children"><span class="nav-icon">👦</span> <span data-lang="admin_children">Bolalar ro'yxati</span></a>
+      <a href="#" data-tab="grades_manage" id="navGrades"><span class="nav-icon">📝</span> <span>Baholash</span></a>
+      <a href="#" data-tab="monitoring" id="navMonitoring" class="hidden"><span class="nav-icon">👁️</span> <span>Kuzatuv</span></a>
+      <a href="#" data-tab="settings"><span class="nav-icon">⚙️</span> <span data-lang="admin_settings">Sozlamalar</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" id="sidebarAvatar">👤</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name" id="sidebarName">Admin</div>
+          <div class="sidebar__user-role" id="sidebarRole">xodim</div>
+        </div>
+        <button class="sidebar__logout" id="logoutBtn" title="Chiqish">🚪</button>
+      </div>
+      <div class="lang-switcher" style="margin-top:12px;width:100%;justify-content:center">
+        <button class="lang-btn active" data-lang-code="uz">🇺🇿</button>
+        <button class="lang-btn"        data-lang-code="ru">🇷🇺</button>
+        <button class="lang-btn"        data-lang-code="en">🇬🇧</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ============================================================ MAIN ============================================================ -->
+  <main class="main-content">
+    <div class="topbar">
+      <button class="topbar__burger" id="topbarBurger">☰</button>
+      <div class="topbar__title" id="topbarTitle">Bosh sahifa</div>
+      <div class="topbar__actions">
+        <a href="index.html" class="btn btn-outline btn-sm" style="text-decoration:none">🌐 Saytga</a>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- =================== BOSH SAHIFA =================== -->
+      <div id="tab-home" class="tab-content">
+        <div class="welcome-card" style="--after-content:'📋'">
+          <div>
+            <h2 id="adminWelcome">Xush kelibsiz, Admin!</h2>
+            <p id="adminDate"></p>
+          </div>
+        </div>
+        <div class="stats-row" id="adminStats">
+          <div class="stat-mini primary"><div class="stat-mini__label">Jami bolalar</div><div class="stat-mini__value" id="stTotal">—</div></div>
+          <div class="stat-mini success"><div class="stat-mini__label">Bugun keldi</div><div class="stat-mini__value" id="stPresent">—</div></div>
+          <div class="stat-mini danger"><div class="stat-mini__label">Kelmadi</div><div class="stat-mini__value" id="stAbsent">—</div></div>
+          <div class="stat-mini warning"><div class="stat-mini__label">Kasal</div><div class="stat-mini__value" id="stSick">—</div></div>
+          <div class="stat-mini primary"><div class="stat-mini__label">Ota-onalar</div><div class="stat-mini__value" id="stParents">—</div></div>
+        </div>
+        <div class="section-card">
+          <div class="section-card__header"><h3>⚡ Tezkor amallar</h3></div>
+          <div class="section-card__body" style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="switchTab('attendance')">✅ Davomat olish</button>
+            <button class="btn btn-secondary" onclick="switchTab('broadcast')">📢 Bildirishnoma yuborish</button>
+            <button class="btn btn-outline" onclick="switchTab('cameras')">📹 Kameralar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== DAVOMAT OLISH =================== -->
+      <div id="tab-attendance" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="admin_att">Davomat olish</h1>
+        </div>
+        <div class="section-card" style="margin-bottom:20px">
+          <div class="section-card__body">
+            <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+              <div class="form-group" style="margin:0;flex:1;min-width:160px">
+                <label class="form-label" data-lang="admin_select_group">Guruhni tanlang</label>
+                <select class="form-control" id="attGroupSel">
+                  <option value="">— Guruh tanlang —</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;flex:1;min-width:160px">
+                <label class="form-label" data-lang="admin_att_date">Sana</label>
+                <input type="date" class="form-control" id="attDate" value="">
+              </div>
+              <button class="btn btn-outline" id="loadChildrenBtn">📋 Yuklash</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bolalar ro'yxati -->
+        <div id="childrenListWrap" class="hidden">
+          <div class="section-card">
+            <div class="section-card__header">
+              <h3 id="attGroupTitle">Guruh</h3>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-sm btn-success" id="markAllPresent">✅ Hammasini belgilash</button>
+              </div>
+            </div>
+            <div class="section-card__body">
+              <div class="attendance-list" id="attList"></div>
+              <div style="margin-top:20px">
+                <button class="btn btn-primary btn-lg" id="saveAttBtn">
+                  💾 <span data-lang="admin_save_att">Saqlash va Yuborish</span>
+                </button>
+                <span id="attSaveStatus" style="margin-left:16px;font-size:.88rem;color:var(--text-secondary)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== BARCHA KAMERALAR =================== -->
+      <div id="tab-cameras" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="admin_cameras">Barcha kameralar</h1>
+          <p>Har bir guruhning kamerasini alohida ko'ring</p>
+        </div>
+        <div class="cameras-grid" id="adminCamerasGrid">
+          <div style="text-align:center;padding:60px;color:var(--text-secondary)">
+            <div style="font-size:3rem">📹</div>
+            <p style="margin-top:12px" data-lang="cam_no_url">Kameralar ulanmagan</p>
+            <p style="font-size:.85rem;margin-top:8px">Ma'lumotlar bazasida guruhning camera_url maydonini to'ldiring</p>
+          </div>
+        </div>
+        <!-- 📹 Kamera URL qo'shish tugmasi -->
+        <div class="section-card" style="margin-top:24px">
+          <div class="section-card__header"><h3>📹 Kamera URL qo'shish</h3></div>
+          <div class="section-card__body">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div class="form-group" style="margin:0;flex:1;min-width:150px">
+                <label class="form-label">Guruh</label>
+                <select class="form-control" id="camGroupSel"></select>
+              </div>
+              <div class="form-group" style="margin:0;flex:2;min-width:200px">
+                <!--
+                  🖼️ KAMERA URL: Kamerangizning stream manzilini kiriting
+                  HLS misol: http://192.168.1.100/stream.m3u8
+                  MJPEG misol: http://192.168.1.100/video
+                  Iframe misol: http://192.168.1.100/
+                -->
+                <label class="form-label">Kamera URL</label>
+                <input type="url" class="form-control" id="camUrlInput" placeholder="http://kamera-ip/stream.m3u8">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Tur</label>
+                <select class="form-control" id="camTypeSel">
+                  <option value="hls">HLS (m3u8)</option>
+                  <option value="mjpeg">MJPEG</option>
+                  <option value="iframe">Iframe</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" id="saveCamBtn">💾 Saqlash</button>
+            </div>
+          </div>
+        </div>
+        <!-- ⛔ Kameralarni Cheklash -->
+        <div class="section-card" style="margin-top:24px">
+          <div class="section-card__header"><h3>⛔ Kameralarni Cheklash</h3></div>
+          <div class="section-card__body">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+              <div class="form-group" style="margin:0;flex:1;min-width:150px">
+                <label class="form-label">Kimlar uchun:</label>
+                <select class="form-control" id="restrictRoleSel">
+                  <option value="parent">Ota-onalar</option>
+                  <option value="all" id="restrictAllOption">Hammaga (Faqat admin)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;flex:1;min-width:150px">
+                <label class="form-label">Qancha vaqt (daqiqa):</label>
+                <input type="number" class="form-control" id="restrictDurInput" placeholder="Masalan: 60" value="60">
+              </div>
+              <button class="btn btn-danger" id="restrictAddBtn">Vaqtinchalik o'chirish</button>
+            </div>
+            <div id="currentRestrictions" style="margin-top:16px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== BILDIRISHNOMA =================== -->
+      <div id="tab-broadcast" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="admin_broadcast_title">Bildirishnoma yuborish</h1>
+          <p>Ota-onalarga Telegram va Email orqali xabar yuboring</p>
+        </div>
+        <div class="broadcast-card">
+          <div class="form-group">
+            <label class="form-label">Sarlavha</label>
+            <input type="text" class="form-control" id="broadTitle" placeholder="Masalan: Ertaga bayram!" value="Muhim xabar">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-lang="admin_broadcast_target">Kimga:</label>
+            <select class="form-control" id="broadGroup">
+              <option value="" data-lang="admin_target_all">Hammaga</option>
+              <!-- Guruhlar JS da qo'shiladi -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-lang="admin_broadcast_msg">Xabar matni</label>
+            <textarea class="form-control" id="broadMessage" rows="5" placeholder="Ota-onalarga yuboriladigan xabar..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Yuborish kanallari</label>
+            <div class="broadcast-channels">
+              <div class="channel-toggle active" id="chanTelegram" onclick="toggleChannel(this)">📤 Telegram</div>
+              <div class="channel-toggle"        id="chanEmail"    onclick="toggleChannel(this)">📧 Email</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-primary btn-lg" id="sendBroadcastBtn">
+              📢 Yuborish
+            </button>
+            <span id="broadcastStatus" style="font-size:.88rem;color:var(--text-secondary)"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== FOYDALANUVCHILAR =================== -->
+      <div id="tab-users" class="tab-content hidden">
+        <div class="page-header">
+          <h1>Foydalanuvchilar zaxirasi</h1>
+          <p>Ota-onalar va xodimlar ma'lumotlarini boshqarish</p>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <button class="btn btn-outline active" id="btnFilterParents" onclick="loadUsersList('parent'); btnFilterParents.classList.add('active'); btnFilterStaff.classList.remove('active')">Ota-onalar</button>
+          <button class="btn btn-outline" id="btnFilterStaff" onclick="loadUsersList('staff'); btnFilterStaff.classList.add('active'); btnFilterParents.classList.remove('active')">Xodimlar</button>
+          <button class="btn btn-primary" style="margin-left:auto" onclick="openUserModal(null)">+ Yangi Foydalanuvchi</button>
+        </div>
+        <div class="section-card">
+          <div class="section-card__body" style="padding:0">
+            <div class="table-wrapper">
+              <table class="grades-table">
+                <thead><tr><th>#</th><th>Ismi</th><th>Telefon</th><th>Rol</th><th>Holat</th><th>Amallar</th></tr></thead>
+                <tbody id="usersTableBody">
+                  <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Yuklanmoqda...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== BOLALAR RO'YXATI =================== -->
+      <div id="tab-children" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="admin_children">Bolalar ro'yxati</h1>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;justify-content:space-between">
+          <select class="form-control" id="childrenGroupFilter" style="max-width:200px">
+            <option value="">— Barcha guruhlar —</option>
+          </select>
+          <button class="btn btn-primary" onclick="document.getElementById('addChildModal').style.display='flex'">Yangi bola qo'shish</button>
+        </div>
+        <div id="childrenTableWrap">
+          <div class="section-card">
+            <div class="section-card__body" style="padding:0">
+              <div class="table-wrapper">
+                <table class="grades-table">
+                  <thead><tr><th>#</th><th>Ismi</th><th>Guruhi</th><th>Tug'ilgan kuni</th><th>Jinsi</th></tr></thead>
+                  <tbody id="childrenTableBody">
+                    <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary)">Guruhni tanlang</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== BAHOLASH (STAFF) =================== -->
+      <div id="tab-grades_manage" class="tab-content hidden">
+        <div class="page-header">
+          <h1>Sifat va Baholash</h1>
+          <p>O'zlashtirish, Odob-axloq, Qobiliyatlari uchun izohli baholash yarating</p>
+        </div>
+        <div class="section-card">
+          <div class="section-card__body">
+            <div class="form-group">
+              <label class="form-label">Guruhni tanlang</label>
+              <select class="form-control" id="gradeGroupSel">
+                <option value="">— Guruh tanlang —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bola ism-sharifi</label>
+              <select class="form-control" id="gradeChildSel">
+                <option value="">— Avval guruhni tanlang —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Baholanayotgan xususiyat (Masalan: Odob-axloq, Yodlash qobiliyati)</label>
+              <input type="text" class="form-control" id="gradeSubject" placeholder="Masalan: Muloqot">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sifat yoki Baho (Masalan: Aqlli, Juda faol, Yaxshi, Yulduzcha)</label>
+              <input type="text" class="form-control" id="gradeValue" placeholder="Masalan: Faol">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Qo'shimcha izoh (ixtiyoriy)</label>
+              <input type="text" class="form-control" id="gradeNote" placeholder="Tavsif, maqtov so'zlari...">
+            </div>
+            <button class="btn btn-primary" id="saveGradeBtn" style="margin-top:10px">💾 Saqlash</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== KUZATUV VA STATISTIKA (ADMIN) =================== -->
+      <div id="tab-monitoring" class="tab-content hidden">
+        <div class="page-header">
+          <h1>Kuzatuv (Monitoring)</h1>
+          <p>Tizimga kim qachon kirdi, kim kameralarni kuzatdi</p>
+        </div>
+        <div class="section-card">
+          <div class="section-card__header">
+            <h3>So'nggi harakatlar</h3>
+            <button class="btn btn-sm btn-outline" onclick="loadActivityLogs()">🔄 Yangilash</button>
+          </div>
+          <div class="section-card__body" style="padding:0">
+            <div class="table-wrapper">
+              <table class="grades-table" style="font-size:0.9rem">
+                <thead><tr><th>№</th><th>Foydalanuvchi</th><th>Amal</th><th>Batafsil</th><th>Vaqt</th></tr></thead>
+                <tbody id="monitoringLogsBody">
+                  <tr><td colspan="5" style="text-align:center;padding:30px">Yuklanmoqda...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== SOZLAMALAR =================== -->
+      <div id="tab-settings" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="admin_settings">Sozlamalar</h1>
+          <p>Profilingiz sozlamalarini yangilang</p>
+        </div>
+        <div class="section-card">
+          <div class="section-card__body" style="max-width: 400px;">
+            <div class="form-group">
+              <label class="form-label">Telefon (Login)</label>
+              <input type="text" id="settingsPhone" class="form-control" placeholder="+998901234567">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Yangi Parol</label>
+              <input type="password" id="settingsPassword" class="form-control" placeholder="Yangi parol (bo'sh bo'lsa o'zgarmaydi)">
+            </div>
+            <button class="btn btn-primary" id="saveSettingsBtn">Saqlash</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<!-- Modal: Yangi bola qo'shish -->
+<div class="sidebar-overlay" id="addChildModal" style="display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,0.5)">
+  <div class="section-card" style="width:100%;max-width:400px;margin:20px;z-index:2001;animation:pop .3s">
+    <div class="section-card__header"><h3>Yangi bola</h3></div>
+    <div class="section-card__body">
+      <div class="form-group">
+        <label>Ismi</label><input type="text" id="addCName" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Guruh</label><select id="addCGroup" class="form-control"></select>
+      </div>
+      <div class="form-group">
+        <label>Tug'ilgan sana</label><input type="date" id="addCDate" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Jins</label>
+        <select id="addCGender" class="form-control">
+          <option value="male">O'g'il bola</option><option value="female">Qiz bola</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button class="btn btn-outline" onclick="document.getElementById('addChildModal').style.display='none'">Bekor qilish</button>
+        <button class="btn btn-primary" id="addChildSaveBtn">Saqlash</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Foydalanuvchi qo'shish / Tahrirlash -->
+<div class="sidebar-overlay" id="userModal" style="display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,0.5)">
+  <div class="section-card" style="width:100%;max-width:400px;margin:20px;z-index:2001;animation:pop .3s">
+    <div class="section-card__header"><h3 id="userModalTitle">Foydalanuvchi</h3></div>
+    <div class="section-card__body">
+      <input type="hidden" id="modalUserId" value="">
+      <div class="form-group">
+        <label>Ismi</label><input type="text" id="modalUserFullName" class="form-control" placeholder="To'liq ism">
+      </div>
+      <div class="form-group">
+        <label>Telefon</label><input type="text" id="modalUserPhone" class="form-control" placeholder="+998901234567">
+      </div>
+      <div class="form-group">
+        <label>Parol</label><input type="text" id="modalUserPass" class="form-control" placeholder="Yangi parol (yoki bo'sh qoldiring)">
+      </div>
+      <div class="form-group">
+        <label>Rol</label>
+        <select id="modalUserRole" class="form-control">
+          <option value="parent">Ota-ona</option>
+          <option value="staff">Xodim</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button class="btn btn-outline" onclick="document.getElementById('userModal').style.display='none'">Bekor qilish</button>
+        <button class="btn btn-primary" onclick="saveUser()">Saqlash</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================================================ JS ============================================================ -->
+<script src="js/lang.js"></script>
+<script>
+const user = JSON.parse(localStorage.getItem('user'));
+let groups = [];
+let selectedChannels = ['telegram'];
+
+// Init
+document.getElementById('sidebarName').textContent = user?.name || 'Admin';
+document.getElementById('sidebarRole').textContent = user?.role || 'xodim';
+document.getElementById('sidebarAvatar').textContent = (user?.name || 'A')[0].toUpperCase();
+document.getElementById('adminWelcome').textContent = `Xush kelibsiz, ${user?.name || 'Admin'}!`;
+document.getElementById('adminDate').textContent = new Date().toLocaleDateString('uz-UZ', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('attDate').value = new Date().toISOString().slice(0,10);
+if(user?.role !== 'admin') document.getElementById('restrictAllOption')?.remove();
+if(user?.role === 'admin') {
+    document.getElementById('navGrades')?.remove(); // Admin uchun baholashni olib tashlaymiz
+    document.getElementById('navMonitoring')?.classList.remove('hidden'); // Kuzatuvni faqat adminga ko'rsatamiz
+}
+document.getElementById('settingsPhone').value = user?.phone || '';
+
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const startTab = urlParams.get('tab');
+  if (startTab) {
+    setTimeout(() => switchTab(startTab), 150);
+  }
+});
+
+// Sidebar toggle
+document.getElementById('topbarBurger').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('active');
+});
+const closeSidebarElements = [document.getElementById('sidebarOverlay'), document.getElementById('sidebarClose')];
+closeSidebarElements.forEach(el => {
+  if(el) el.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  });
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fetch('backend/logout.php', { credentials: 'include' });
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
+});
+
+// Tab navigation
+document.querySelectorAll('[data-tab]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    switchTab(link.dataset.tab);
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+  });
+});
+
+function switchTab(tab) {
+  document.querySelectorAll('[data-tab]').forEach(l => l.classList.toggle('active', l.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+  const el = document.getElementById('tab-' + tab);
+  if (el) el.classList.remove('hidden');
+  document.getElementById('topbarTitle').textContent = {
+    home:'Bosh sahifa', attendance:'Davomat olish',
+    cameras:'Kameralar', broadcast:'Bildirishnoma',
+    users:'Foydalanuvchilar',
+    grades_manage:'Sifat va Baholash',
+    monitoring: 'Tizim Kuzatuvi',
+    children:'Bolalar ro\'yxati', settings:'Sozlamalar'
+  }[tab] || '';
+  if (tab === 'cameras') loadRestrictions();
+  if (tab === 'monitoring') loadActivityLogs();
+  if (tab === 'users') {
+      const isParentActive = document.getElementById('btnFilterParents').classList.contains('active');
+      loadUsersList(isParentActive ? 'parent' : 'staff');
+  }
+}
+
+// Load groups
+async function loadGroups() {
+  try {
+    const res  = await fetch('backend/get_data.php?type=groups', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success) return;
+    groups = data.groups;
+    // Dropdowns
+    ['attGroupSel','broadGroup','camGroupSel','childrenGroupFilter','gradeGroupSel'].forEach(id => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      // Broad ga "Hammaga" qolsin
+      if (id !== 'broadGroup') { sel.innerHTML = id === 'childrenGroupFilter'
+        ? '<option value="">— Barcha guruhlar —</option>'
+        : '<option value="">— Guruh tanlang —</option>'; }
+      groups.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id; opt.textContent = g.name;
+        sel.appendChild(opt);
+      });
+    });
+    // addCGroup
+    const aGrp = document.getElementById('addCGroup');
+    if (aGrp) {
+        aGrp.innerHTML = '';
+        groups.forEach(g => aGrp.appendChild(new Option(g.name, g.id)));
+    }
+  } catch{}
+}
+
+// Load dashboard stats
+async function loadStats() {
+  try {
+    const res  = await fetch('backend/get_data.php?type=dashboard_stats', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success) return;
+    const s = data.stats;
+    document.getElementById('stTotal').textContent   = s.total   || 0;
+    document.getElementById('stPresent').textContent = s.present || 0;
+    document.getElementById('stAbsent').textContent  = s.absent  || 0;
+    document.getElementById('stSick').textContent    = s.sick    || 0;
+    document.getElementById('stParents').textContent = s.parents || 0;
+  } catch{}
+}
+
+// Load cameras
+async function loadCameras() {
+  try {
+    const res  = await fetch('backend/get_data.php?type=cameras', { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success) return;
+    const grid = document.getElementById('adminCamerasGrid');
+    const cams = data.cameras.filter(c => c.camera_url);
+    if (!cams.length) return;
+    grid.innerHTML = cams.map(c => `
+      <div class="camera-card">
+        <div class="camera-card__header">
+          <span class="camera-card__title">📹 ${c.name}</span>
+          <div class="camera-live-dot"></div>
+        </div>
+        <div class="camera-card__screen">
+          ${getCameraEmbed(c.camera_url, c.camera_type)}
+        </div>
+      </div>`).join('');
+  } catch{}
+}
+
+// User CRUD operations
+let allUsers = [];
+async function loadUsersList(role) {
+    try {
+        const res = await fetch(`backend/manage_users.php?action=list&role=${role}`);
+        const data = await res.json();
+        const tbody = document.getElementById('usersTableBody');
+        
+        if (!data.success) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:red">${data.error}</td></tr>`;
+            return;
+        }
+        allUsers = data.users;
+        if (!allUsers.length) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Hali foydalanuvchilar yo'q</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = allUsers.map((u, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td><strong>${u.full_name}</strong></td>
+                <td>${u.phone}</td>
+                <td><span style="background:var(--bg-card);padding:4px 8px;border-radius:6px;font-size:0.8rem">${u.role}</span></td>
+                <td>${u.is_active ? 'Faol' : 'O\'chirilgan'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" style="padding:4px 8px;margin-right:6px" onclick="openUserModal(${u.id})">Tahrir</button>
+                    <button class="btn btn-sm btn-danger" style="padding:4px 8px" onclick="deleteUser(${u.id})">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch {
+        showToast('Server bilan xatolik', 'error');
+    }
+}
+
+function openUserModal(id) {
+    const isCreate = !id;
+    document.getElementById('userModalTitle').textContent = isCreate ? 'Yangi foydalanuvchi' : 'Foydalanuvchini tahrirlash';
+    const roleOpt = document.getElementById('modalUserRole');
+    if (user.role === 'staff') {
+        const hasStaffOpt = Array.from(roleOpt.options).find(o => o.value === 'staff');
+        if (hasStaffOpt) hasStaffOpt.remove();
+        roleOpt.value = 'parent';
+    }
+
+    if (isCreate) {
+        document.getElementById('modalUserId').value = '';
+        document.getElementById('modalUserFullName').value = '';
+        document.getElementById('modalUserPhone').value = '+998';
+        document.getElementById('modalUserPass').value = '';
+        document.getElementById('modalUserRole').value = document.getElementById('btnFilterParents').classList.contains('active') ? 'parent' : 'staff';
+    } else {
+        const u = allUsers.find(x => x.id == id);
+        if(!u) return;
+        document.getElementById('modalUserId').value = u.id;
+        document.getElementById('modalUserFullName').value = u.full_name;
+        document.getElementById('modalUserPhone').value = u.phone;
+        document.getElementById('modalUserPass').value = ''; // Do NOT prefill password
+        document.getElementById('modalUserRole').value = u.role;
+    }
+    document.getElementById('userModal').style.display = 'flex';
+}
+
+async function saveUser() {
+    const id = document.getElementById('modalUserId').value;
+    const isCreate = !id;
+    const act = isCreate ? 'create' : 'update';
+    
+    const d = new URLSearchParams();
+    d.append('action', act);
+    d.append('full_name', document.getElementById('modalUserFullName').value);
+    d.append('phone', document.getElementById('modalUserPhone').value);
+    d.append('password', document.getElementById('modalUserPass').value);
+    d.append('role', document.getElementById('modalUserRole').value);
+    if (!isCreate) d.append('user_id', id);
+
+    try {
+        const r = await fetch('backend/manage_users.php', { method:'POST', body:d });
+        const j = await r.json();
+        if(j.success) {
+            showToast(j.message);
+            document.getElementById('userModal').style.display = 'none';
+            loadUsersList(document.getElementById('btnFilterParents').classList.contains('active') ? 'parent' : 'staff');
+        } else {
+            showToast(j.error, 'error');
+        }
+    } catch(e) { showToast('Xatolik', 'error'); }
+}
+
+async function deleteUser(id) {
+    if(!confirm("Haqiqatdan ham bu foydalanuvchini o'chirmoqchimisiz?")) return;
+    try {
+        const d = new URLSearchParams();
+        d.append('action', 'delete');
+        d.append('user_id', id);
+        const r = await fetch('backend/manage_users.php', { method:'POST', body:d });
+        const j = await r.json();
+        if(j.success) {
+            showToast(j.message);
+            loadUsersList(document.getElementById('btnFilterParents').classList.contains('active') ? 'parent' : 'staff');
+        } else {
+            showToast(j.error, 'error');
+        }
+    } catch(e) { showToast('Xatolik', 'error'); }
+}
+
+async function loadRestrictions() {
+  try {
+    const res = await fetch('backend/camera_restrictions.php');
+    const data = await res.json();
+    if(data.success) {
+      document.getElementById('currentRestrictions').innerHTML = data.restrictions.map(r => `
+        <div style="padding:10px;background:var(--danger);color:#fff;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+          <span>⛔ ${r.target_role === 'all' ? 'Hammaga' : 'Ota-onalarga'} (${r.restricted_by_name}) - ${new Date(r.restricted_until).toLocaleTimeString('uz-UZ')} gacha</span>
+          <button class="btn btn-sm" style="background:rgba(255,255,255,0.2);color:#fff;border:none" onclick="removeRestriction('${r.target_role}')">Olib tashlash</button>
+        </div>
+      `).join('');
+    }
+  } catch(e) {}
+}
+
+async function removeRestriction(role) {
+  try {
+    const data = new URLSearchParams();
+    data.append('action', 'remove');
+    data.append('target_role', role);
+    const res = await fetch('backend/camera_restrictions.php', { method: 'POST', body: data });
+    const j = await res.json();
+    if(j.success) { showToast(j.message); loadRestrictions(); }
+    else showToast(j.error, 'error');
+  } catch(e) { console.error(e); }
+}
+
+document.getElementById('restrictAddBtn')?.addEventListener('click', async () => {
+    const target = document.getElementById('restrictRoleSel').value;
+    const dur = document.getElementById('restrictDurInput').value;
+    if(!dur || dur < 1) return showToast('Vaqtni kiriting', 'error');
+    const data = new URLSearchParams();
+    data.append('action', 'add');
+    data.append('target_role', target);
+    data.append('duration_minutes', dur);
+    const res = await fetch('backend/camera_restrictions.php', { method: 'POST', body: data });
+    const j = await res.json();
+    if(j.success) { showToast(j.message); loadRestrictions(); }
+    else showToast(j.error, 'error');
+});
+
+function getCameraEmbed(url, type) {
+  if (!url) return '<div class="camera-no-signal">📹 Signal yo\'q</div>';
+  if (type === 'iframe') return `<iframe src="${url}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`;
+  if (type === 'mjpeg')  return `<img src="${url}" style="width:100%;height:100%;object-fit:cover" alt="Camera">`;
+  return `<video controls autoplay muted playsinline style="width:100%;height:100%"><source src="${url}">Brauzer qo'llab-quvvatlamaydi</video>`;
+}
+
+// Fetch and render Activity Logs (Kuzatuv)
+async function loadActivityLogs() {
+  try {
+    const res = await fetch('backend/get_data.php?type=activity_logs', { credentials: 'include' });
+    const data = await res.json();
+    const tbody = document.getElementById('monitoringLogsBody');
+    if (!data.success) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:red">${data.error}</td></tr>`;
+      return;
+    }
+    if (!data.logs.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-secondary)">Hali hech qanday harakat yo'q</td></tr>`;
+      return;
+    }
+    
+    tbody.innerHTML = data.logs.map((log, index) => {
+      let icon = 'ℹ️';
+      if(log.action === 'login') icon = '🔑';
+      if(log.action === 'view_cameras') icon = '📹';
+      
+      const roleStr = log.role ? ` (${log.role})` : '';
+      const dateStr = new Date(log.created_at).toLocaleString('uz-UZ');
+      
+      return `
+      <tr>
+        <td>${index + 1}</td>
+        <td><strong>${log.full_name || 'Noma\'lum:'}${roleStr}</strong></td>
+        <td>${icon} ${log.action}</td>
+        <td style="color:var(--text-secondary)">${log.details}</td>
+        <td style="font-size:0.85rem">${dateStr}</td>
+      </tr>
+      `;
+    }).join('');
+  } catch(e) {
+    document.getElementById('monitoringLogsBody').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:red">Server xatosi</td></tr>`;
+  }
+}
+
+// Save camera URL
+document.getElementById('saveCamBtn').addEventListener('click', async () => {
+  const groupId = document.getElementById('camGroupSel').value;
+  const url     = document.getElementById('camUrlInput').value.trim();
+  const type    = document.getElementById('camTypeSel').value;
+  if (!groupId || !url) { showToast('Guruh va URL kiritish shart', 'error'); return; }
+  // DB ga saqlash uchun PHP endpoint (oddiy)
+  try {
+    const res  = await fetch('backend/save_camera.php', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ group_id: groupId, camera_url: url, camera_type: type })
+    });
+    const data = await res.json();
+    if (data.success) { showToast('Kamera saqlandi!'); loadCameras(); }
+    else showToast(data.error || 'Xato', 'error');
+  } catch { showToast('Server bilan bog\'lanib bo\'lmadi', 'error'); }
+});
+
+// Load children for attendance
+document.getElementById('loadChildrenBtn').addEventListener('click', async () => {
+  const groupId = document.getElementById('attGroupSel').value;
+  const date    = document.getElementById('attDate').value;
+  if (!groupId) { showToast('Guruhni tanlang', 'error'); return; }
+  try {
+    const res  = await fetch(`backend/get_data.php?type=children&group_id=${groupId}&date=${date}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success) { showToast(data.error, 'error'); return; }
+    renderAttList(data.children, groupId);
+    const g = groups.find(x => x.id == groupId);
+    document.getElementById('attGroupTitle').textContent = `${g?.name || 'Guruh'} — ${date}`;
+    document.getElementById('childrenListWrap').classList.remove('hidden');
+  } catch { showToast('Xato', 'error'); }
+});
+
+// Attendance state
+let attState = {};
+
+function renderAttList(children, groupId) {
+  attState = {};
+  const list = document.getElementById('attList');
+  list.innerHTML = children.map(c => {
+    attState[c.id] = c.att_status || null;
+    const statusClass = c.att_status ? `marked-${c.att_status}` : '';
+    return `
+    <div class="attendance-row ${statusClass}" id="att-row-${c.id}">
+      <div class="att-child-name">${c.gender === 'female' ? '👧' : '👦'} ${c.full_name}</div>
+      <div class="att-buttons">
+        <button class="att-btn present ${c.att_status==='present'?'selected':''}" onclick="setAtt(${c.id},'present',this)">✅ Keldi</button>
+        <button class="att-btn absent  ${c.att_status==='absent' ?'selected':''}" onclick="setAtt(${c.id},'absent', this)">❌ Kelmadi</button>
+        <button class="att-btn sick    ${c.att_status==='sick'   ?'selected':''}" onclick="setAtt(${c.id},'sick',   this)">🤒 Kasal</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setAtt(childId, status, btn) {
+  attState[childId] = status;
+  const row = document.getElementById(`att-row-${childId}`);
+  row.className = `attendance-row marked-${status}`;
+  row.querySelectorAll('.att-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// Mark all present
+document.getElementById('markAllPresent').addEventListener('click', () => {
+  const rows = document.querySelectorAll('.attendance-row');
+  rows.forEach(row => {
+    const id = row.id.replace('att-row-','');
+    attState[id] = 'present';
+    row.className = 'attendance-row marked-present';
+    row.querySelectorAll('.att-btn').forEach(b => b.classList.remove('selected'));
+    row.querySelector('.att-btn.present')?.classList.add('selected');
+  });
+});
+
+// Save attendance
+document.getElementById('saveAttBtn').addEventListener('click', async () => {
+  const groupId = document.getElementById('attGroupSel').value;
+  const date    = document.getElementById('attDate').value;
+  const status  = document.getElementById('attSaveStatus');
+  const btn     = document.getElementById('saveAttBtn');
+  const records = Object.entries(attState)
+    .filter(([,s]) => s)
+    .map(([child_id, status]) => ({ child_id: parseInt(child_id), status }));
+  if (!records.length) { showToast('Hech kim belgilanmagan', 'error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span> Saqlanmoqda...';
+  try {
+    const res  = await fetch('backend/attendance.php', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ group_id: groupId, date, attendance: records })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✅ Saqlandi! ${data.notified} ta Telegram xabar yuborildi`);
+      status.textContent = data.telegram_note;
+    } else { showToast(data.error || 'Xato', 'error'); }
+  } catch { showToast('Server xatosi', 'error'); }
+  btn.disabled = false;
+  btn.innerHTML = '💾 <span data-lang="admin_save_att">Saqlash va Yuborish</span>';
+  applyLang(currentLang);
+});
+
+// Channel toggle
+function toggleChannel(el) {
+  el.classList.toggle('active');
+  const id = el.id === 'chanTelegram' ? 'telegram' : 'email';
+  if (el.classList.contains('active')) {
+    if (!selectedChannels.includes(id)) selectedChannels.push(id);
+  } else {
+    selectedChannels = selectedChannels.filter(c => c !== id);
+  }
+}
+
+// Children filter
+document.getElementById('childrenGroupFilter').addEventListener('change', async function() {
+  const groupId = this.value;
+  const tbody = document.getElementById('childrenTableBody');
+  if (!groupId) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-secondary)">Guruhni tanlang</td></tr>';
+    return;
+  }
+  try {
+    const res  = await fetch(`backend/get_data.php?type=children&group_id=${groupId}&date=${new Date().toISOString().slice(0,10)}`, {credentials:'include'});
+    const data = await res.json();
+    if (!data.success) return;
+    tbody.innerHTML = data.children.map((c,i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${c.gender === 'female' ? '👧' : '👦'} ${c.full_name}</strong></td>
+        <td>${groups.find(g => g.id == document.getElementById('childrenGroupFilter').value)?.name || '—'}</td>
+        <td>${c.birth_date ? new Date(c.birth_date).toLocaleDateString('uz-UZ') : '—'}</td>
+        <td style="display:flex;justify-content:space-between;align-items:center">
+          ${c.gender === 'female' ? 'Qiz' : 'O\'g\'il'}
+          <button class="btn btn-sm btn-danger" style="padding:4px 8px" onclick="deleteChild(${c.id})">🗑️</button>
+        </td>
+      </tr>`).join('');
+  } catch {}
+});
+
+// Grades Management specific JS
+document.getElementById('gradeGroupSel').addEventListener('change', async function() {
+  const groupId = this.value;
+  const sel = document.getElementById('gradeChildSel');
+  if (!groupId) { sel.innerHTML = '<option value="">— Avval guruhni tanlang —</option>'; return; }
+  sel.innerHTML = '<option value="">Yuklanmoqda...</option>';
+  try {
+    const res = await fetch(`backend/get_data.php?type=children&group_id=${groupId}&date=${new Date().toISOString().slice(0,10)}`, {credentials:'include'});
+    const data = await res.json();
+    if(data.success) {
+      sel.innerHTML = '<option value="">— Bolani tanlang —</option>';
+      data.children.forEach(c => sel.appendChild(new Option(c.full_name, c.id)));
+    } else sel.innerHTML = '<option value="">Xato</option>';
+  } catch { sel.innerHTML = '<option value="">Xato</option>'; }
+});
+
+document.getElementById('saveGradeBtn').addEventListener('click', async () => {
+  const childId = document.getElementById('gradeChildSel').value;
+  const subject = document.getElementById('gradeSubject').value;
+  const grade = document.getElementById('gradeValue').value;
+  const note = document.getElementById('gradeNote').value;
+  
+  if(!childId || !subject || !grade) { showToast('Barcha majburiy maydonlarni to\'ldiring', 'error'); return; }
+  
+  const d = new URLSearchParams();
+  d.append('child_id', childId);
+  d.append('subject', subject);
+  d.append('grade', grade);
+  d.append('note', note);
+  
+  try {
+    const btn = document.getElementById('saveGradeBtn');
+    btn.disabled = true;
+    const r = await fetch('backend/manage_grades.php', { method:'POST', body:d });
+    const j = await r.json();
+    if(j.success) { 
+      showToast(j.message); 
+      document.getElementById('gradeSubject').value = ''; 
+      document.getElementById('gradeValue').value = ''; 
+      document.getElementById('gradeNote').value = ''; 
+    }
+    else showToast(j.error, 'error');
+    btn.disabled = false;
+    btn.disabled = false;
+  } catch(e) { showToast('Server bilan bog\'lanishda xato', 'error'); document.getElementById('saveGradeBtn').disabled = false; }
+});
+
+async function deleteChild(childId) {
+    if(!confirm("Kichkintoy ma'lumotlarini o'chirmoqchimisiz?")) return;
+    try {
+        const d = new URLSearchParams(); d.append('action', 'delete'); d.append('child_id', childId);
+        const r = await fetch('backend/manage_child.php', {method: 'POST', body: d});
+        const j = await r.json();
+        if(j.success) {
+            showToast(j.message);
+            document.getElementById('childrenGroupFilter').dispatchEvent(new Event('change'));
+        } else showToast(j.error, 'error');
+    } catch(e) { showToast('Xatolik', 'error'); }
+}
+
+document.getElementById('addChildSaveBtn')?.addEventListener('click', async () => {
+    const name = document.getElementById('addCName').value;
+    const group = document.getElementById('addCGroup').value;
+    const date = document.getElementById('addCDate').value;
+    const gender = document.getElementById('addCGender').value;
+    if(!name || !group) return showToast('Ism va guruh majburiy', 'error');
+    try {
+        const d = new URLSearchParams(); d.append('action', 'add'); d.append('name', name);
+        d.append('group_id', group); d.append('birth_date', date); d.append('gender', gender);
+        const r = await fetch('backend/manage_child.php', {method:'POST', body:d});
+        const j = await r.json();
+        if(j.success) {
+            showToast(j.message);
+            document.getElementById('addChildModal').style.display = 'none';
+            document.getElementById('addCName').value = '';
+            document.getElementById('childrenGroupFilter').value = group;
+            document.getElementById('childrenGroupFilter').dispatchEvent(new Event('change'));
+        } else showToast(j.error, 'error');
+    } catch(e) { showToast('Xatolik', 'error'); }
+});
+
+document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
+    const phone = document.getElementById('settingsPhone').value;
+    const pwd = document.getElementById('settingsPassword').value;
+    const d = new URLSearchParams();
+    if(phone) d.append('phone', phone);
+    if(pwd) d.append('password', pwd);
+    try {
+        const r = await fetch('backend/update_profile.php', {method:'POST', body:d});
+        const j = await r.json();
+        if(j.success) {
+            showToast(j.message);
+            user.phone = phone;
+            localStorage.setItem('user', JSON.stringify(user));
+            document.getElementById('settingsPassword').value = '';
+        } else showToast(j.error, 'error');
+    } catch(e) {}
+});
+
+// Load Activity Logs
+async function loadActivityLogs() {
+  if (user?.role !== 'admin') return;
+  const tbody = document.getElementById('monitoringLogsBody');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px">Yuklanmoqda...</td></tr>';
+  try {
+    const res = await fetch('backend/get_data.php?type=activity_logs');
+    const data = await res.json();
+    if(data.success && data.logs) {
+      if(!data.logs.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px">Ma\'lumot yo\'q</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.logs.map((L,i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td><strong>${L.full_name||'Noma\'lum'}</strong> <div style="font-size:0.75rem;color:var(--text-secondary)">${L.role||''}</div></td>
+          <td>${L.action}</td>
+          <td>${L.details}</td>
+          <td>${new Date(L.created_at).toLocaleString('uz-UZ')}</td>
+        </tr>
+      `).join('');
+    } else tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:red">Xato yoki ruxsat yo\'q</td></tr>';
+  } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:red">Server xatosi</td></tr>'; }
+}
+
+// Send broadcast
+document.getElementById('sendBroadcastBtn').addEventListener('click', async () => {
+  const title   = document.getElementById('broadTitle').value.trim();
+  const groupId = document.getElementById('broadGroup').value || null;
+  const message = document.getElementById('broadMessage').value.trim();
+  const status  = document.getElementById('broadcastStatus');
+  const btn     = document.getElementById('sendBroadcastBtn');
+  if (!message) { showToast('Xabar matni bo\'sh', 'error'); return; }
+  if (!selectedChannels.length) { showToast('Kanal tanlang', 'error'); return; }
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span> Yuborilmoqda...';
+  try {
+    const res  = await fetch('backend/broadcast.php', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, group_id: groupId, message, channels: selectedChannels })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message || 'Yuborildi!');
+      status.textContent = data.message;
+      document.getElementById('broadMessage').value = '';
+    } else { showToast(data.error || 'Xato', 'error'); }
+  } catch { showToast('Server xatosi', 'error'); }
+  btn.disabled = false;
+  btn.innerHTML = '📢 Yuborish';
+});
+
+// Toast
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `${type === 'success' ? '✅' : '❌'} ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// Init
+loadGroups().then(() => { loadStats(); loadCameras(); });
+</script>
+</body>
+</html>

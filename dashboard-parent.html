@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mening Kabinetim — Kindergarten</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ota-ona kirmaganida login ga yo'naltirish -->
+<script>
+  (async function verifySession() {
+    const backupU = JSON.parse(localStorage.getItem('user') || 'null');
+    if (!backupU || backupU.role !== 'parent') { window.location.href = 'login.html'; return; }
+    try {
+        const res = await fetch('backend/check_auth.php', { credentials: 'include' });
+        const data = await res.json();
+        if (!data.success || data.user.role !== 'parent') {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    } catch(e) {}
+  })();
+</script>
+
+<div class="dashboard-layout">
+
+  <!-- ============================================================
+       SIDEBAR (YON MENYU)
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__header">
+      <div class="sidebar__logo">
+        <div class="sidebar__logo-icon">🏫</div>
+        <span>Kindergarten</span>
+      </div>
+      <button class="sidebar__close" id="sidebarClose" title="Yopish">✕</button>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__section-title" data-lang="dash_home">Bosh sahifa</div>
+      <a href="#" class="active" data-tab="home">
+        <span class="nav-icon">🏠</span> <span data-lang="dash_home">Bosh sahifa</span>
+      </a>
+      <a href="#" data-tab="attendance">
+        <span class="nav-icon">📊</span> <span data-lang="dash_attendance">Davomat</span>
+      </a>
+      <a href="#" data-tab="cameras">
+        <span class="nav-icon">📹</span> <span data-lang="dash_cameras">Kameralar</span>
+      </a>
+      <a href="#" data-tab="grades">
+        <span class="nav-icon">📝</span> <span data-lang="dash_grades">Baholar</span>
+      </a>
+      <a href="#" data-tab="messages">
+        <span class="nav-icon">🔔</span> <span data-lang="dash_messages">Xabarlar</span>
+      </a>
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar" id="sidebarAvatar">👤</div>
+        <div class="sidebar__user-info">
+          <div class="sidebar__user-name" id="sidebarName">Yuklanmoqda...</div>
+          <div class="sidebar__user-role">Ota-ona</div>
+        </div>
+        <button class="sidebar__logout" id="logoutBtn" title="Chiqish">🚪</button>
+      </div>
+      <!-- Til almashtirish -->
+      <div class="lang-switcher" style="margin-top:12px;width:100%;justify-content:center">
+        <button class="lang-btn active" data-lang-code="uz">🇺🇿</button>
+        <button class="lang-btn"        data-lang-code="ru">🇷🇺</button>
+        <button class="lang-btn"        data-lang-code="en">🇬🇧</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobil overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ============================================================
+       ASOSIY KONTENT
+       ============================================================ -->
+  <main class="main-content">
+    <div class="topbar">
+      <button class="topbar__burger" id="topbarBurger">☰</button>
+      <div class="topbar__title" id="topbarTitle">Bosh sahifa</div>
+      <div class="topbar__actions">
+        <div class="lang-switcher" style="display:none" id="topLang">
+          <button class="lang-btn active" data-lang-code="uz">🇺🇿 UZ</button>
+          <button class="lang-btn"        data-lang-code="ru">🇷🇺 RU</button>
+          <button class="lang-btn"        data-lang-code="en">🇬🇧 EN</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Yuklanish ko'rsatgichi -->
+      <div id="loadingState" style="text-align:center;padding:60px 0;color:var(--text-secondary)">
+        <div class="loading-spinner" style="border-top-color:var(--primary);border-color:rgba(76,131,240,.2);width:40px;height:40px;margin:0 auto 16px"></div>
+        <p>Ma'lumotlar yuklanmoqda...</p>
+      </div>
+
+      <!-- =================== BOSH SAHIFA (HOME) =================== -->
+      <div id="tab-home" class="tab-content hidden">
+        <div class="welcome-card">
+          <div>
+            <h2 id="welcomeText">Xush kelibsiz!</h2>
+            <p id="welcomeDate"></p>
+          </div>
+        </div>
+
+        <!-- Statistika -->
+        <div class="stats-row" id="statsRow">
+          <div class="stat-mini success">
+            <div class="stat-mini__label" data-lang="dash_present">Keldi</div>
+            <div class="stat-mini__value" id="statPresent">—</div>
+          </div>
+          <div class="stat-mini danger">
+            <div class="stat-mini__label" data-lang="dash_absent">Kelmadi</div>
+            <div class="stat-mini__value" id="statAbsent">—</div>
+          </div>
+          <div class="stat-mini warning">
+            <div class="stat-mini__label" data-lang="dash_sick">Kasal</div>
+            <div class="stat-mini__value" id="statSick">—</div>
+          </div>
+          <div class="stat-mini primary">
+            <div class="stat-mini__label">Jami kun</div>
+            <div class="stat-mini__value" id="statTotal">—</div>
+          </div>
+        </div>
+
+        <!-- Bola profili -->
+        <div class="section-card" style="margin-bottom:24px">
+          <div class="section-card__header">
+            <h3 data-lang="dash_child_profile">Bolam profili</h3>
+          </div>
+          <div class="section-card__body">
+            <div class="child-profile">
+              <div class="child-avatar" id="childAvatarEmoji">👦</div>
+              <div class="child-info">
+                <h3 id="childName">—</h3>
+                <p>🌸 <span id="childGroup">—</span></p>
+                <p>👩‍🏫 <span id="childTeacher">—</span></p>
+                <p>🎂 <span id="childBirthday">—</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bugungi davomat -->
+        <div class="section-card">
+          <div class="section-card__header">
+            <h3 data-lang="dash_today_att">Bugungi davomat</h3>
+            <div id="todayBadge"></div>
+          </div>
+          <div class="section-card__body" id="todayAttBody">—</div>
+        </div>
+      </div>
+
+      <!-- =================== DAVOMAT =================== -->
+      <div id="tab-attendance" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="dash_attendance">Davomat</h1>
+          <p data-lang="dash_month_att">Oylik davomat</p>
+        </div>
+        <div class="attendance-calendar">
+          <div class="cal-header">
+            <div class="cal-title" id="calMonthTitle">—</div>
+            <div class="cal-nav">
+              <button id="calPrev">‹</button>
+              <button id="calNext">›</button>
+            </div>
+          </div>
+          <!-- Hafta kunlari -->
+          <div class="cal-grid" id="calGrid">
+            <div class="cal-day-name">Du</div>
+            <div class="cal-day-name">Se</div>
+            <div class="cal-day-name">Ch</div>
+            <div class="cal-day-name">Pa</div>
+            <div class="cal-day-name">Ju</div>
+            <div class="cal-day-name">Sh</div>
+            <div class="cal-day-name">Ya</div>
+          </div>
+          <!-- Legend -->
+          <div class="cal-legend">
+            <div class="cal-legend-item"><div class="cal-dot present"></div> Keldi</div>
+            <div class="cal-legend-item"><div class="cal-dot absent"></div> Kelmadi</div>
+            <div class="cal-legend-item"><div class="cal-dot sick"></div> Kasal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== KAMERALAR =================== -->
+      <div id="tab-cameras" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="dash_cameras">Kameralar</h1>
+          <p>Farzandingizning guruhi kamerasini real vaqtda kuzating</p>
+        </div>
+        <!-- Kamera konteyner (JS da to'ldiriladi) -->
+        <div class="cameras-grid" id="camerasGrid">
+          <div style="text-align:center;padding:60px;color:var(--text-secondary)">
+            <div style="font-size:3rem">📹</div>
+            <p style="margin-top:12px" data-lang="cam_no_url">Kamera ulanmagan</p>
+            <p style="font-size:.85rem;margin-top:8px" data-lang="cam_help">Administrator kamera URL sini kiritishi kerak</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== BAHOLAR =================== -->
+      <div id="tab-grades" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="dash_grades">Baholar</h1>
+        </div>
+        <div class="section-card">
+          <div class="section-card__body" style="padding:0">
+            <div class="table-wrapper">
+              <table class="grades-table">
+                <thead>
+                  <tr>
+                    <th>Fan</th>
+                    <th>Baho</th>
+                    <th>Davr</th>
+                    <th>Izoh</th>
+                  </tr>
+                </thead>
+                <tbody id="gradesBody">
+                  <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-secondary)">Yuklanmoqda...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =================== XABARLAR =================== -->
+      <div id="tab-messages" class="tab-content hidden">
+        <div class="page-header">
+          <h1 data-lang="dash_messages">Xabarlar</h1>
+        </div>
+        <div class="section-card">
+          <div class="section-card__body">
+            <div style="text-align:center;padding:40px;color:var(--text-secondary)">
+              <div style="font-size:3rem">🔔</div>
+              <p style="margin-top:12px;font-weight:600">Xabarlar Telegram orqali keladi</p>
+              <p style="font-size:.88rem;margin-top:8px">Agar Telegram botni ulamasangiz, quyidagi qadamni bajaring:</p>
+              <div style="background:var(--bg);border-radius:12px;padding:20px;margin-top:20px;text-align:left;max-width:400px;margin-left:auto;margin-right:auto">
+                <p style="font-weight:600;margin-bottom:8px">📱 Telegram botni ulash:</p>
+                <!-- 🖊️ Bot username ni o'zgartiring -->
+                <p>1. Telegramda <a href="https://t.me/kindergarten_bot" target="_blank" style="color:var(--primary);font-weight:700">@kindergarten_bot</a> ni toping</p>
+                <p style="margin-top:8px">2. <code style="background:#fff;padding:2px 8px;border-radius:4px;font-size:.88rem">/start</code> buyrug'ini yuboring</p>
+                <p style="margin-top:8px">3. Telefon raqamingizni yuboring</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </main>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script src="js/lang.js"></script>
+<script>
+// Foydalanuvchi ma'lumotlari
+const user = JSON.parse(localStorage.getItem('user'));
+
+// --- DOM elementlari ---
+const sidebar         = document.getElementById('sidebar');
+const sidebarOverlay  = document.getElementById('sidebarOverlay');
+const topbarBurger    = document.getElementById('topbarBurger');
+
+// Sidebar ochish/yopish (mobil)
+topbarBurger.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+  sidebarOverlay.classList.toggle('active');
+});
+const closeSidebarElements = [sidebarOverlay, document.getElementById('sidebarClose')];
+closeSidebarElements.forEach(el => {
+  if(el) el.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+  });
+});
+
+// Chiqish
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await fetch('backend/logout.php', { credentials: 'include' });
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
+});
+
+// --- TAB navigatsiya ---
+let currentTab = 'home';
+document.querySelectorAll('[data-tab]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    switchTab(link.dataset.tab);
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+  });
+});
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('[data-tab]').forEach(l => l.classList.toggle('active', l.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+  const el = document.getElementById('tab-' + tab);
+  if (el) el.classList.remove('hidden');
+}
+
+// --- Ma'lumotlarni yuklash ---
+let childData = null;
+let currentMonth = new Date().toISOString().slice(0, 7);
+
+async function loadParentData(month) {
+  try {
+    const res  = await fetch(`backend/get_data.php?type=parent_data&month=${month}`, { credentials: 'include' });
+    const data = await res.json();
+    if (!data.success) { showToast('Xato: ' + data.error, 'error'); return; }
+    childData = data;
+    renderHome(data);
+    renderCalendar(data.attendance, month);
+    renderGrades(data.grades);
+    renderCameras(data.child.camera_url, data.child.camera_type, data.child.group_name, data.child.restrict_message);
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('tab-home').classList.remove('hidden');
+  } catch (e) {
+    document.getElementById('loadingState').innerHTML =
+      '<p style="color:var(--danger)">❌ Server bilan bog\'lanib bo\'lmadi. XAMPP ishga tushganmi?</p>';
+  }
+}
+
+function renderHome(data) {
+  const child = data.child;
+  const stats = data.stats;
+  const today = new Date();
+  // Sidebar
+  document.getElementById('sidebarName').textContent = user.name || 'Ota-ona';
+  document.getElementById('sidebarAvatar').textContent = (user.name || 'O')[0].toUpperCase();
+  // Welcome
+  document.getElementById('welcomeText').textContent = `${t('dash_welcome')}, ${user.name}!`;
+  document.getElementById('welcomeDate').textContent = today.toLocaleDateString('uz-UZ', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  // Child
+  document.getElementById('childName').textContent    = child.full_name || '—';
+  document.getElementById('childGroup').textContent   = child.group_name || '—';
+  document.getElementById('childTeacher').textContent = child.teacher_name || '—';
+  document.getElementById('childBirthday').textContent = child.birth_date ? formatDate(child.birth_date) : '—';
+  document.getElementById('childAvatarEmoji').textContent = child.gender === 'female' ? '👧' : '👦';
+  // Stats
+  document.getElementById('statPresent').textContent = stats.present || 0;
+  document.getElementById('statAbsent').textContent  = stats.absent  || 0;
+  document.getElementById('statSick').textContent    = stats.sick    || 0;
+  document.getElementById('statTotal').textContent   = stats.total   || 0;
+  // Today
+  const todayStr = today.toISOString().slice(0,10);
+  const todayRec = (data.attendance || []).find(a => a.date === todayStr);
+  const badge = document.getElementById('todayBadge');
+  const body  = document.getElementById('todayAttBody');
+  if (todayRec) {
+    const map = { present: ['badge-success','✅ Keldi'], absent: ['badge-danger','❌ Kelmadi'], sick: ['badge-warning','🤒 Kasal'], excused: ['badge-info','📋 Sababli'] };
+    const [cls, txt] = map[todayRec.status] || ['badge-info', todayRec.status];
+    badge.innerHTML = `<span class="badge ${cls}">${txt}</span>`;
+    body.innerHTML  = `<p style="font-size:.95rem">${txt}${todayRec.note ? ' — ' + todayRec.note : ''}</p>`;
+  } else {
+    badge.innerHTML = `<span class="badge badge-info">📋 Hali belgilanmagan</span>`;
+    body.innerHTML  = `<p style="color:var(--text-secondary)">Bugungi davomat hali olinmagan.</p>`;
+  }
+}
+
+function renderCalendar(attendance, month) {
+  const [year, mon] = month.split('-').map(Number);
+  const monthNames  = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+  document.getElementById('calMonthTitle').textContent = `${monthNames[mon-1]} ${year}`;
+  const attMap = {};
+  (attendance || []).forEach(a => { attMap[a.date] = a.status; });
+  const firstDay = new Date(year, mon - 1, 1).getDay(); // 0=Yak,1=Du...
+  const daysInMonth = new Date(year, mon, 0).getDate();
+  const offset = (firstDay === 0 ? 6 : firstDay - 1); // Dushanba = 0
+  const today  = new Date().toISOString().slice(0,10);
+  const grid   = document.getElementById('calGrid');
+  // Hafta nomlari qolsin, kunlarni tozalash
+  const dayNames = Array.from(grid.querySelectorAll('.cal-day-name'));
+  grid.innerHTML = '';
+  dayNames.forEach(d => grid.appendChild(d));
+  for (let i = 0; i < offset; i++) {
+    const blank = document.createElement('div');
+    blank.className = 'cal-day empty';
+    grid.appendChild(blank);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(mon).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const div = document.createElement('div');
+    div.className = 'cal-day';
+    div.textContent = d;
+    if (attMap[dateStr]) div.classList.add(attMap[dateStr]);
+    if (dateStr === today) div.classList.add('today');
+    if (dateStr > today)  div.classList.add('future');
+    grid.appendChild(div);
+  }
+}
+
+function renderGrades(grades) {
+  const tbody = document.getElementById('gradesBody');
+  if (!grades || !grades.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-secondary)">Baholar hali yo\'q</td></tr>';
+    return;
+  }
+  const gradeColors = {5:'var(--success)',4:'var(--primary)',3:'var(--warning)',2:'var(--danger)'};
+  tbody.innerHTML = grades.map(g => {
+    const gradeNum = parseInt(g.grade);
+    const color = gradeColors[gradeNum] || 'var(--text)';
+    return `<tr>
+      <td><strong>${g.subject}</strong></td>
+      <td><span class="grade-pill" style="background:${color}20;color:${color}">${g.grade}</span></td>
+      <td>${g.period || '—'}</td>
+      <td style="color:var(--text-secondary)">${g.note || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCameras(url, type, groupName, restrictMessage) {
+  const grid = document.getElementById('camerasGrid');
+  if (restrictMessage) {
+    grid.innerHTML = `
+      <div class="camera-card">
+        <div class="camera-card__header">
+          <span class="camera-card__title">📹 ${groupName || 'Kamera'} (Cheklangan)</span>
+        </div>
+        <div class="camera-card__screen" style="display:flex;align-items:center;justify-content:center;background:#000;color:#fff;text-align:center;padding:20px;">
+          <div>
+            <div style="font-size:3rem;margin-bottom:10px">⛔</div>
+            <h3 style="color:var(--danger)">Kamera vaqtinchalik o'chirilgan</h3>
+            <p style="margin-top:8px">${restrictMessage}</p>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  if (!url) { return; } // placeholder qoladi
+  grid.innerHTML = `
+    <div class="camera-card">
+      <div class="camera-card__header">
+        <span class="camera-card__title">📹 ${groupName || 'Kamera'}</span>
+        <div class="camera-live-dot"></div>
+      </div>
+      <div class="camera-card__screen" id="camScreen">
+        ${getCameraEmbed(url, type)}
+      </div>
+    </div>`;
+}
+
+function getCameraEmbed(url, type) {
+  if (!url) return '<div class="camera-no-signal">📹 Signal yo\'q</div>';
+  if (type === 'iframe') return `<iframe src="${url}" style="width:100%;height:100%;border:none" allowfullscreen></iframe>`;
+  if (type === 'mjpeg')  return `<img src="${url}" style="width:100%;height:100%;object-fit:cover" alt="Camera stream">`;
+  // HLS yoki boshqa → video tegi
+  // 📹 HLS uchun hls.js kutubxonasi kerak bo'lsa, quyidagi scriptni ulashingiz mumkin
+  return `<video id="hlsVideo" controls autoplay muted playsinline style="width:100%;height:100%">
+    <source src="${url}" type="application/x-mpegURL">
+    Brauzeringiz video formatini qo'llab-quvvatlamaydi.
+  </video>`;
+}
+
+// --- Kalendar navigatsiya ---
+document.getElementById('calPrev').addEventListener('click', () => {
+  const [y, m] = currentMonth.split('-').map(Number);
+  const prev = new Date(y, m - 2, 1);
+  currentMonth = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}`;
+  loadParentData(currentMonth).then(() => switchTab('attendance'));
+});
+document.getElementById('calNext').addEventListener('click', () => {
+  const [y, m] = currentMonth.split('-').map(Number);
+  const next = new Date(y, m, 1);
+  currentMonth = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}`;
+  loadParentData(currentMonth).then(() => switchTab('attendance'));
+});
+
+// --- Utility funksiyalar ---
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `${type === 'success' ? '✅' : '❌'} ${msg}`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// --- Start ---
+loadParentData(currentMonth);
+
+// Read URL params and route conditionally
+document.addEventListener("DOMContentLoaded", () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const startTab = urlParams.get('tab');
+  if (startTab) {
+    setTimeout(() => switchTab(startTab), 150);
+  }
+});
+</script>
+</body>
+</html>

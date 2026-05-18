@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirish — Kindergarten</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN SAHIFASI — Ota-onalar va xodimlar uchun yagona kirish
+     Login qilingandan so'ng:
+       - ota-ona → dashboard-parent.html ga o'tadi
+       - xodim/admin → dashboard-admin.html ga o'tadi
+     ============================================================ -->
+
+<div class="login-page">
+  <div class="login-card">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="login-logo-icon">🏫</div>
+      <h2 data-lang="login_title">Tizimga kirish</h2>
+      <p data-lang="login_subtitle">Telefon va parolni kiriting</p>
+    </div>
+
+    <!-- Til almashtirish -->
+    <div class="lang-switcher" style="justify-content:center;margin-bottom:24px">
+      <button class="lang-btn active" data-lang-code="uz">🇺🇿 UZ</button>
+      <button class="lang-btn"        data-lang-code="ru">🇷🇺 RU</button>
+      <button class="lang-btn"        data-lang-code="en">🇬🇧 EN</button>
+    </div>
+
+    <!-- Xato xabari (login noto'g'ri bo'lganda ko'rinadi) -->
+    <div class="login-error hidden" id="loginError">
+      ❌ <span data-lang="login_error">Noto'g'ri login yoki parol</span>
+    </div>
+
+    <!-- Login formasi -->
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label class="form-label" data-lang="login_phone">Telefon raqam</label>
+        <input
+          type="tel"
+          id="phone"
+          class="form-control"
+          data-lang-placeholder="login_phone"
+          placeholder="+998 90 123-45-67"
+          required
+          autocomplete="tel"
+        >
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-lang="login_pass">Parol</label>
+        <div style="position:relative">
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="••••••••"
+            required
+            autocomplete="current-password"
+            style="padding-right:48px"
+          >
+          <!-- Ko'rsatish/yashirish tugmasi -->
+          <button type="button" id="togglePass"
+            style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:var(--text-light)">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <!-- Kirish tugmasi -->
+      <button type="submit" class="btn btn-primary btn-full btn-lg" id="loginBtn">
+        <span data-lang="login_btn">Kirish</span>
+      </button>
+    </form>
+
+    <!-- Pastki havolalar -->
+    <div class="login-footer" style="margin-top:20px">
+      <a href="index.html" data-lang="login_back">← Bosh sahifaga</a>
+      <span style="margin:0 8px;color:var(--border)">|</span>
+      <span data-lang="login_help" id="forgotPassBtn" style="cursor:pointer;color:var(--primary);text-decoration:underline">Parolni yo'qotdingizmi?</span>
+      <br><br>
+      <!-- 💻 KODGA IZOH: Raqamni o'zgartirish uchun `href="tel:+..."` va tag ichidagi yozuvni almashtiring -->
+      <a href="tel:+9989168816811" data-lang="login_help_link"> Bog'chaga qo'ng'iroq qiling</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN PAROL TIKLASH MODAL (Faqat Admin)
+     ============================================================ -->
+<div class="sidebar-overlay" id="forgotPassModal" style="display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,0.5)">
+  <div class="login-card" style="width:100%;max-width:400px;margin:20px;z-index:2001;animation:pop .3s">
+    <h3 style="margin-bottom:10px">Admin Parolni Tiklash</h3>
+    <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:15px">
+      Yangi parol ma'lumotlar bazasida saqlangan admin raqamiga ulangan Telegram Bot manziliga yuboriladi. 
+    </p>
+    <div class="form-group">
+      <label class="form-label">Admin Telefon Raqami</label>
+      <input type="tel" id="forgotPhone" class="form-control" placeholder="+998 90 000 00 01">
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="document.getElementById('forgotPassModal').style.display='none'">Bekor qilish</button>
+      <button class="btn btn-primary" id="sendForgotBtn">Botga jo'natish</button>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:15px 0">
+    <button class="btn btn-outline btn-full btn-sm" onclick="alert('Ro\'yxatdan o\'tmagansiz! Avval Telegram botga (/start) yozishingiz kerak. Admin ekanligingizni tasdiqlsh uchun backend guruhga ulaning.');" style="font-size:0.85rem">
+      Kodni olmadim (Botda yo'qmisiz?)
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script src="js/lang.js"></script>
+<script>
+
+// ============================================================
+// 💻 KODGA IZOH: Auto Login tekshiruvi.
+// Agar localStorage da foydalanuvchi bo'lsa, login sahifasini
+// ko'rsatmasdan birdaniga panelga o'tkazib yuboradi.
+const currentUser = JSON.parse(localStorage.getItem('user'));
+if (currentUser) {
+  window.location.href = 'index.html';
+}
+
+// Parolni ko'rsatish / yashirish
+document.getElementById('togglePass').addEventListener('click', function () {
+  const pass = document.getElementById('password');
+  pass.type = pass.type === 'password' ? 'text' : 'password';
+  this.textContent = pass.type === 'password' ? '👁️' : '🙈';
+});
+
+// Login formasi yuborilganda
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const phone    = document.getElementById('phone').value.trim();
+  const password = document.getElementById('password').value;
+  const btn      = document.getElementById('loginBtn');
+  const errBox   = document.getElementById('loginError');
+
+  // Tugmani "yuklanyapti" holatiga o'tkazish
+  btn.innerHTML = '<span class="loading-spinner"></span>';
+  btn.disabled  = true;
+  errBox.classList.add('hidden');
+
+  try {
+    // backend/login.php ga so'rov yuborish
+    const res  = await fetch('backend/login.php', {
+      method: 'POST',
+      credentials: 'include',       // sessiya cookie sini saqlash uchun
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Foydalanuvchi ma'lumotlarini localStorage da saqlash
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      // Rolga qarab yo'naltirish
+      if (data.user.role === 'parent') {
+        window.location.href = 'index.html';
+      } else {
+        // staff yoki admin → asosiy sahifa
+        window.location.href = 'index.html';
+      }
+    } else {
+      // Xato ko'rsatish
+      errBox.classList.remove('hidden');
+      errBox.innerHTML = '❌ <span>' + (data.error || 'Xatolik yuz berdi') + '</span>';
+      btn.innerHTML = '<span data-lang="login_btn">Kirish</span>';
+      btn.disabled  = false;
+      // Tilni qayta qo'llash (yangi element uchun)
+      applyLang(currentLang);
+    }
+  } catch (err) {
+    // Server bilan bog'lanib bo'lmadi
+    errBox.classList.remove('hidden');
+    errBox.innerHTML = '❌ Server bilan bog\'lanib bo\'lmadi. XAMPP ishga tushganmi?';
+    btn.innerHTML = '<span data-lang="login_btn">Kirish</span>';
+    btn.disabled  = false;
+  }
+});
+
+// Parolni tiklash logika
+document.getElementById('forgotPassBtn').addEventListener('click', () => {
+  document.getElementById('forgotPassModal').style.display = 'flex';
+});
+
+document.getElementById('sendForgotBtn').addEventListener('click', async function() {
+  const phone = document.getElementById('forgotPhone').value.trim();
+  if(!phone) { alert("Telefon raqam kiriting!"); return; }
+  
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Kuting...';
+  
+  try {
+    const res = await fetch('backend/forgot_password.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone })
+    });
+    const data = await res.json();
+    alert(data.success ? data.message : data.error);
+    if (data.success) {
+      document.getElementById('forgotPassModal').style.display = 'none';
+    }
+  } catch(e) {
+    alert("Server xatosi");
+  }
+  btn.disabled = false;
+  btn.textContent = 'Botga jo\'natish';
+});
+</script>
+</body>
+</html>

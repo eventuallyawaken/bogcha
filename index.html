@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Kindergarten — Furqat tumani, Tomosha qishlog'i. Onlayn kamera, davomat va bildirishnomalar.">
+  <title>Kindergarten — Furqat tumani</title>
+  <!-- 🎨 Shrift -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- 🎨 Asosiy stil fayli -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER — SAHIFa YUQORI QISMI
+     ============================================================ -->
+<header class="header" id="header">
+  <nav class="nav container">
+
+    <!-- Logo -->
+    <div class="nav__logo">
+      <div class="logo-icon">🏫</div>
+      <!-- 🖊️ Bog'cha nomini o'zgartiring -->
+      <span>Kindergarten</span>
+    </div>
+
+    <!-- Havola linklar (desktop) -->
+    <div class="nav__links">
+      <a href="#about"   data-lang="nav_about">Biz haqimizda</a>
+      <a href="#groups"  data-lang="nav_groups">Guruhlar</a>
+      <a href="#contact" data-lang="nav_contact">Aloqa</a>
+    </div>
+
+    <!-- O'ng tomon: til + login -->
+    <div class="nav__actions" id="desktopNavActions">
+      <!-- Til almashtirish tugmalari -->
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang-code="uz">🇺🇿 UZ</button>
+        <button class="lang-btn"        data-lang-code="ru">🇷🇺 RU</button>
+        <button class="lang-btn"        data-lang-code="en">🇬🇧 EN</button>
+      </div>
+      <!-- Kirish tugmalari (JS bilan o'zgaradi) -->
+      <a href="login.html" class="btn btn-primary" id="navLoginBtn" data-lang="nav_login">Kirish</a>
+      <a href="#" class="btn btn-danger hidden" id="navLogoutBtn" onclick="logoutApp()">Chiqish</a>
+    </div>
+
+    <!-- Mobil burger menyu tugmasi -->
+    <button class="nav__burger" id="navBurger" aria-label="Menyu">☰</button>
+  </nav>
+</header>
+
+<!-- Mobil menyu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about"   data-lang="nav_about">Biz haqimizda</a>
+  <a href="#groups"  data-lang="nav_groups">Guruhlar</a>
+  <a href="#contact" data-lang="nav_contact">Aloqa</a>
+  <div class="lang-switcher">
+    <button class="lang-btn active" data-lang-code="uz">🇺🇿 UZ</button>
+    <button class="lang-btn"        data-lang-code="ru">🇷🇺 RU</button>
+    <button class="lang-btn"        data-lang-code="en">🇬🇧 EN</button>
+  </div>
+  <a href="login.html" class="btn btn-primary" id="mobileNavLoginBtn" data-lang="nav_login">Kirish</a>
+  <a href="#" class="btn btn-danger hidden" id="mobileNavLogoutBtn" onclick="logoutApp()">Chiqish</a>
+</div>
+
+<!-- ============================================================
+     HERO — BOSH SAHIFA (TO'LIQ EKRAN)
+     ============================================================ -->
+<section class="hero">
+  <!-- Fon shakllari -->
+  <div class="hero__shape"></div>
+  <div class="hero__shape"></div>
+
+  <div class="hero__content container">
+    <!-- Kichik teg -->
+    <div class="hero__tag" data-lang="hero_tag">🏫 Furqat tumani, Tomosha qishlog'i</div>
+    <!-- Asosiy sarlavha -->
+    <h1 class="hero__title" data-lang="hero_title">Farzandlaringiz xavfsizligi – bizning ustuvorligimiz</h1>
+    <!-- Tavsif -->
+    <p class="hero__subtitle" data-lang="hero_subtitle">Onlayn kamera, davomat va bildirishnomalar bir joyda.</p>
+    <!-- Tugmalar -->
+    <div class="hero__actions">
+      <a href="login.html" class="btn-hero-primary" id="heroLoginBtn" data-lang="hero_btn">Kirish</a>
+      <a href="#about"     class="btn-hero-outline"  data-lang="hero_btn2">Ko'proq bilish</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     STATISTIKA
+     ============================================================ -->
+<section class="stats">
+  <div class="container">
+    <div class="stats__grid">
+      <div class="stat-card">
+        <span class="stat-number" id="statsChildrenCount"><div class="loading-spinner" style="border-color:var(--primary);border-top-color:transparent;"></div></span>
+        <span class="stat-label" data-lang="stat_children">ta bola</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statsGroupsCount"><div class="loading-spinner" style="border-color:var(--primary);border-top-color:transparent;"></div></span>
+        <span class="stat-label" data-lang="stat_groups">ta guruh</span>
+      </div>
+      <div class="stat-card">
+        <!-- 🖊️ Tajriba yilini o'zgartiring -->
+        <span class="stat-number">5+</span>
+        <span class="stat-label" data-lang="stat_years">yillik tajriba</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">3</span>
+        <span style="font-size:.9rem;color:var(--text-secondary);margin-top:4px;display:block">til</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     IMKONIYATLAR (FEATURES)
+     ============================================================ -->
+<section class="features" id="about">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-tag" data-lang="feat_section_tag">Imkoniyatlar</div>
+      <h2 class="section-title" data-lang="feat_section_title">Ota-onalar uchun maxsus funksiyalar</h2>
+    </div>
+    <div class="features__grid">
+      <div class="feature-card" onclick="routeFeature('camera')">
+        <div class="feature-icon">📹</div>
+        <h3 data-lang="feat_camera_title">Online Kamera</h3>
+        <p data-lang="feat_camera_desc">Farzandingizni real vaqtda kuzating</p>
+      </div>
+      <div class="feature-card" onclick="routeFeature('attendance')">
+        <div class="feature-icon">📊</div>
+        <h3 data-lang="feat_att_title">Davomat</h3>
+        <p data-lang="feat_att_desc">Kunlik davomat darhol Telegram orqali bildiriladi</p>
+      </div>
+      <div class="feature-card" onclick="routeFeature('notifications')">
+        <div class="feature-icon">🔔</div>
+        <h3 data-lang="feat_notify_title">Bildirishnomalar</h3>
+        <p data-lang="feat_notify_desc">Telegram va email orqali barcha xabarlar</p>
+      </div>
+      <div class="feature-card" onclick="routeFeature('grades')">
+        <div class="feature-icon">📝</div>
+        <h3 data-lang="feat_grades_title">Baholar</h3>
+        <p data-lang="feat_grades_desc">Farzandingizning o'qish natijalari</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     GURUHLAR
+     ============================================================ -->
+<section class="groups" id="groups">
+  <div class="container">
+    <div class="section-header center">
+      <div class="section-tag" data-lang="groups_tag">Guruhlar</div>
+      <h2 class="section-title" data-lang="groups_title">Bizning guruhlar</h2>
+    </div>
+    <div class="groups__grid" id="groupsGrid">
+      <p style="text-align:center;width:100%;color:var(--text-secondary)">Guruhlar yuklanmoqda...</p>
+    </div>
+  </div>
+</section>
+
+<!-- Guruhni tahrirlash modali (faqat xodimlar/adminlar uchun) -->
+<div class="sidebar-overlay" id="editGroupModal" style="display:none;align-items:center;justify-content:center;z-index:3000;background:rgba(0,0,0,0.5)">
+  <div class="login-card" style="width:100%;max-width:400px;margin:20px;z-index:3001;padding:24px">
+    <h3 style="margin-bottom:16px" id="editGroupTitle">Guruhni tahrirlash</h3>
+    <input type="hidden" id="editGroupId">
+    <div class="form-group">
+      <label class="form-label">Guruh nomi</label>
+      <input type="text" id="editGroupName" class="form-control">
+    </div>
+    <div class="form-group">
+      <label class="form-label">O'qituvchi nomi</label>
+      <input type="text" id="editGroupTeacher" class="form-control">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Yosh oralig'i</label>
+      <input type="text" id="editGroupAge" class="form-control">
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('editGroupModal').style.display='none'">Bekor qilish</button>
+      <button class="btn btn-primary btn-sm" onclick="saveGroupDetails()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ALOQA (CONTACT)
+     ============================================================ -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag" data-lang="contact_tag">Aloqa</div>
+      <h2 class="section-title" data-lang="contact_title">Biz bilan bog'laning</h2>
+    </div>
+    <div class="contact__grid">
+      <div class="contact__info">
+
+        <!-- Manzil -->
+        <div class="contact-item">
+          <div class="contact-item__icon">📍</div>
+          <div class="contact-item__text">
+            <h4 data-lang="contact_addr_title">Manzil</h4>
+            <!-- 🖊️ Manzilni o'zgartiring -->
+            <p data-lang="contact_addr">Furqat tumani, Tomosha qishlog'i</p>
+          </div>
+        </div>
+
+        <!-- Telefon -->
+        <div class="contact-item">
+          <div class="contact-item__icon">📞</div>
+          <div class="contact-item__text">
+            <h4 data-lang="contact_phone_title">Telefon</h4>
+            <!-- 🖊️ Telefon raqamini o'zgartiring -->
+            <p><a href="tel:+998901234567" style="color:var(--primary);font-weight:600">+998 90 123-45-67</a></p>
+          </div>
+        </div>
+
+        <!-- Telegram -->
+        <div class="contact-item">
+          <div class="contact-item__icon">✈️</div>
+          <div class="contact-item__text">
+            <h4>Telegram</h4>
+            <!-- 🖊️ Telegram username ni o'zgartiring -->
+            <p><a href="https://t.me/kindergarten_furqat" target="_blank" style="color:var(--primary);font-weight:600">@kindergarten_furqat</a></p>
+          </div>
+        </div>
+
+        <!-- Ish vaqti -->
+        <div class="contact-item">
+          <div class="contact-item__icon">🕗</div>
+          <div class="contact-item__text">
+            <h4 data-lang="contact_hours_title">Ish vaqti</h4>
+            <p data-lang="contact_hours">Dush–Juma, 08:00–18:00</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Xarita / Lokatsiya qo'shadigan qism -->
+      <div class="contact__map">
+        <span>🗺️</span>
+        <!-- 💡 XARITA QO'SHISH UCHUN IZOH: 💡
+             1. Google Maps (yoki Yandex Maps) ga kiring va o'z joyingizni toping.
+             2. "Ulashish" (Share) va "Xaritani joylashtirish" (Embed a map) tugmalarini bosing.
+             3. Olingan <iframe src="..."> kodidan nusxa oling va shu yerga qo'ying.
+             Misol uchun: <iframe src="https://www.google.com/maps/embed?pb=!1m18!..." width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+             Siz qo'shgan izoh xaritada ko'rinadi va bu avvalgi placeholderni almashtiradi. -->
+        <p>Furqat tumani, Tomosha qishlog'i</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <h3>🏫 Kindergarten</h3>
+        <p data-lang="footer_desc">Farzandlaringiz xavfsiz va qo'llab-quvvatlangan muhitda o'sishiga yordam beramiz.</p>
+      </div>
+      <div class="footer__col">
+        <h4 data-lang="footer_links">Havolalar</h4>
+        <ul>
+          <li><a href="#about"   data-lang="nav_about">Biz haqimizda</a></li>
+          <li><a href="#groups"  data-lang="nav_groups">Guruhlar</a></li>
+          <li><a href="#contact" data-lang="nav_contact">Aloqa</a></li>
+          <li><a href="login.html" data-lang="nav_login">Kirish</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 data-lang="footer_contact">Aloqa</h4>
+        <ul>
+          <!-- 🖊️ Ma'lumotlarni o'zgartiring -->
+          <li><a href="tel:+998901234567">+998 90 123-45-67</a></li>
+          <li><a href="https://t.me/kindergarten_furqat">Telegram</a></li>
+          <li><a href="mailto:admin@kindergarten.uz">Email</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span data-lang="footer_rights">© 2025 Kindergarten. Barcha huquqlar himoyalangan.</span>
+      <div class="lang-switcher">
+        <button class="lang-btn active" data-lang-code="uz">🇺🇿 UZ</button>
+        <button class="lang-btn"        data-lang-code="ru">🇷🇺 RU</button>
+        <button class="lang-btn"        data-lang-code="en">🇬🇧 EN</button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     JAVASCRIPT FAYLLAR
+     ============================================================ -->
+<script src="js/lang.js"></script>
+<script>
+// Header scroll effekti
+window.addEventListener('scroll', () => {
+  document.getElementById('header').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Mobil menyu ochish/yopish
+document.getElementById('navBurger').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.toggle('open');
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { target.scrollIntoView({ behavior: 'smooth' }); }
+    document.getElementById('mobileMenu').classList.remove('open');
+  });
+});
+// --- Auto-Login & Backend Auth Check ---
+async function checkAuth() {
+  try {
+    const res = await fetch('backend/check_auth.php', { credentials: 'include' });
+    const data = await res.json();
+    if (data.success && data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user));
+      updateAuthUI(data.user);
+    } else {
+      localStorage.removeItem('user');
+      updateAuthUI(null);
+    }
+  } catch(e) {
+    // If request fails but user is in local storage, assume they might need to re-login to avoid staleness
+    const u = JSON.parse(localStorage.getItem('user') || 'null');
+    updateAuthUI(u);
+  }
+}
+
+function updateAuthUI(u) {
+  const loginBtns = [document.getElementById('navLoginBtn'), document.getElementById('mobileNavLoginBtn'), document.getElementById('heroLoginBtn')];
+  const logoutBtns = [document.getElementById('navLogoutBtn'), document.getElementById('mobileNavLogoutBtn')];
+  
+  if (u) {
+    let panelUrl = (u.role === 'parent') ? 'dashboard-parent.html' : 'dashboard-admin.html';
+    let panelText = (u.role === 'parent') ? 'Ota-ona paneli' : (u.role === 'admin' ? 'Admin paneli' : 'Xodim paneli');
+    
+    loginBtns.forEach(btn => {
+      if(btn) {
+        btn.innerHTML = panelText;
+        btn.href = panelUrl;
+      }
+    });
+    logoutBtns.forEach(btn => {
+      if(btn) btn.classList.remove('hidden');
+    });
+  } else {
+    loginBtns.forEach(btn => {
+      if(btn) {
+        btn.innerHTML = 'Kirish';
+        btn.href = 'login.html';
+      }
+    });
+    logoutBtns.forEach(btn => {
+      if(btn) btn.classList.add('hidden');
+    });
+  }
+}
+
+async function logoutApp() {
+  await fetch('backend/logout.php', { credentials: 'include' });
+  localStorage.removeItem('user');
+  window.location.reload();
+}
+
+checkAuth();
+
+let loadedGroups = [];
+
+function fetchLandingStats() {
+  fetch('backend/get_data.php?type=landing_stats').then(r => r.json()).then(data => {
+    if (data.success) {
+      document.getElementById('statsChildrenCount').textContent = data.stats.children + '+';
+      document.getElementById('statsGroupsCount').textContent = data.stats.groups;
+    } else {
+      document.getElementById('statsChildrenCount').textContent = '45+';
+      document.getElementById('statsGroupsCount').textContent = '3+';
+    }
+  }).catch(()=>{
+    document.getElementById('statsChildrenCount').textContent = '45+';
+    document.getElementById('statsGroupsCount').textContent = '3+';
+  });
+}
+
+function fetchGroups() {
+  fetch('backend/get_data.php?type=public_groups').then(r => r.json()).then(data => {
+    if (data.success) {
+      loadedGroups = data.groups;
+      renderDynamicGroups();
+    }
+  }).catch(()=>{});
+}
+
+function renderDynamicGroups() {
+  const user = JSON.parse(localStorage.getItem('user'));
+  const canEdit = user && (user.role === 'admin' || user.role === 'staff');
+  
+  const colors = [
+    {bg: '#FFD9E8,#FF85A1', icon: '🌸'}, {bg: '#D9F5D9,#56C568', icon: '🌿'}, {bg: '#FFF3CD,#FFB800', icon: '⭐'}
+  ];
+  
+  document.getElementById('groupsGrid').innerHTML = loadedGroups.map((g, i) => {
+    const color = colors[i % colors.length];
+    return `
+      <div class="group-card" style="position:relative">
+        <div class="group-card__img" style="background:linear-gradient(135deg,${color.bg})">${color.icon}</div>
+        <div class="group-card__body">
+          ${canEdit ? `<button onclick="openGroupEditor(${g.id})" style="position:absolute;top:15px;right:15px;background:white;border-radius:50%;padding:8px;box-shadow:0 2px 5px rgba(0,0,0,0.2);cursor:pointer;z-index:10;">✏️</button>` : ''}
+          <h3>${color.icon} ${g.name}</h3>
+          <p class="teacher">O'qituvchi: ${g.teacher_name || 'Kiritilmagan'}</p>
+          <p class="age">${g.age_range || ' '}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openGroupEditor(id) {
+  const g = loadedGroups.find(x => x.id == id);
+  if(!g) return;
+  document.getElementById('editGroupId').value = g.id;
+  document.getElementById('editGroupName').value = g.name;
+  document.getElementById('editGroupTeacher').value = g.teacher_name;
+  document.getElementById('editGroupAge').value = g.age_range;
+  document.getElementById('editGroupModal').style.display = 'flex';
+}
+
+function saveGroupDetails() {
+  const d = new URLSearchParams();
+  d.append('group_id', document.getElementById('editGroupId').value);
+  d.append('name', document.getElementById('editGroupName').value);
+  d.append('teacher_name', document.getElementById('editGroupTeacher').value);
+  d.append('age_range', document.getElementById('editGroupAge').value);
+  
+  fetch('backend/manage_groups.php', { method: 'POST', body: d }).then(r=>r.json()).then(j => {
+    if(j.success) {
+      document.getElementById('editGroupModal').style.display='none';
+      fetchGroups(); 
+    } else alert(j.error);
+  });
+}
+
+function routeFeature(feature) {
+  const uObj = JSON.parse(localStorage.getItem('user'));
+  if (!uObj) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const r = uObj.role;
+  let url = (r === 'parent') ? 'dashboard-parent.html?tab=' : 'dashboard-admin.html?tab=';
+  
+  if (feature === 'camera') url += 'cameras';
+  if (feature === 'attendance') url += 'attendance';
+  if (feature === 'notifications') {
+    url += (r === 'parent') ? 'messages' : 'broadcast';
+  }
+  if (feature === 'grades') {
+    url += (r === 'parent') ? 'grades' : 'grades_manage';
+  }
+  
+  window.location.href = url;
+}
+
+fetchLandingStats();
+fetchGroups();
+</script>
+
+</body>
+</html>
