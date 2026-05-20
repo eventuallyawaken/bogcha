@@ -238,55 +238,75 @@
 
           const phone = document.getElementById("phone").value.trim();
           const password = document.getElementById("password").value;
+
           const btn = document.getElementById("loginBtn");
           const errBox = document.getElementById("loginError");
 
-          // Tugmani "yuklanyapti" holatiga o'tkazish
           btn.innerHTML = '<span class="loading-spinner"></span>';
           btn.disabled = true;
+
           errBox.classList.add("hidden");
 
           try {
-            // backend/login.php ga so'rov yuborish
             const res = await fetch(
               "https://bogcha.infinityfreeapp.com/login.php",
               {
                 method: "POST",
-                credentials: "include", // sessiya cookie sini saqlash uchun
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone, password }),
+
+                headers: {
+                  "Content-Type": "application/json",
+                },
+
+                body: JSON.stringify({
+                  phone,
+                  password,
+                }),
               },
             );
 
-            const data = await res.json();
+            console.log("STATUS:", res.status);
+
+            const text = await res.text();
+
+            console.log("SERVER RESPONSE:");
+            console.log(text);
+
+            let data;
+
+            try {
+              data = JSON.parse(text);
+            } catch {
+              throw new Error("Server JSON qaytarmadi");
+            }
 
             if (data.success) {
-              // Foydalanuvchi ma'lumotlarini localStorage da saqlash
               localStorage.setItem("user", JSON.stringify(data.user));
 
-              // Rolga qarab yo'naltirish
               if (data.user.role === "parent") {
                 window.location.href = "index.html";
               } else {
-                // staff yoki admin → asosiy sahifa
                 window.location.href = "index.html";
               }
             } else {
-              // Xato ko'rsatish
               errBox.classList.remove("hidden");
-              errBox.innerHTML =
-                "❌ <span>" + (data.error || "Xatolik yuz berdi") + "</span>";
+
+              errBox.innerHTML = "❌ " + (data.error || "Xatolik yuz berdi");
+
               btn.innerHTML = '<span data-lang="login_btn">Kirish</span>';
+
               btn.disabled = false;
-              // Tilni qayta qo'llash (yangi element uchun)
+
               applyLang(currentLang);
             }
           } catch (err) {
-            // Server bilan bog'lanib bo'lmadi
+            console.error(err);
+
             errBox.classList.remove("hidden");
-            errBox.innerHTML =
-              "❌ Server bilan bog'lanib bo'lmadi. Iltimos, keyinroq qayta urinib ko'ring.</span>";
+
+            errBox.innerHTML = "❌ Server bilan bog‘lanib bo‘lmadi";
+
             btn.innerHTML = '<span data-lang="login_btn">Kirish</span>';
+
             btn.disabled = false;
           }
         });
