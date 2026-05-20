@@ -6,15 +6,15 @@
 
 // --- Ma'lumotlar bazasi ---
 // 🖊️ Agar XAMPP da DB nomingiz boshqacha bo'lsa, o'zgartiring
-define('DB_HOST', '127.0.0.1:3307');
-define('DB_NAME', 'bogcha');
-define('DB_USER', 'root');
-define('DB_PASS', '');          // XAMPP da sukut bo'yicha bo'sh
+define('DB_HOST', 'sql205.infinityfree.com');
+define('DB_NAME', 'if0_41970397_bogcha');
+define('DB_USER', 'if0_41970397');
+define('DB_PASS', 'U5VmzW1RxST');          // XAMPP da sukut bo'yicha bo'sh
 
 // --- Telegram Bot ---
 // 🤖 @BotFather dan bot yaratib, tokenini shu yerga qo'ying
 // Misol: '1234567890:ABCdefGHIjklMNOpqrsTUVwxyz'
-define('TELEGRAM_BOT_TOKEN', 'YOUR_BOT_TOKEN_HERE');
+define('TELEGRAM_BOT_TOKEN', '8615527855:AAHqCQ8FqpCNAaE44bUJKMlsothE0-B3_JI');
 
 // --- Email (Gmail SMTP) ---
 // 📧 Gmail hisobingizdan App Password oling:
