@@ -248,12 +248,15 @@
 
           try {
             // backend/login.php ga so'rov yuborish
-            const res = await fetch("https://bogcha.infinityfreeapp.com", {
-              method: "POST",
-              credentials: "include", // sessiya cookie sini saqlash uchun
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ phone, password }),
-            });
+            const res = await fetch(
+              "https://bogcha.infinityfreeapp.com/login.php",
+              {
+                method: "POST",
+                credentials: "include", // sessiya cookie sini saqlash uchun
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone, password }),
+              },
+            );
 
             const data = await res.json();
 
