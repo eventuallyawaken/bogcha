@@ -248,7 +248,7 @@
 
           try {
             // backend/login.php ga so'rov yuborish
-            const res = await fetch("http://bogcha.infinityfreeapp.com", {
+            const res = await fetch("https://bogcha.infinityfreeapp.com", {
               method: "POST",
               credentials: "include", // sessiya cookie sini saqlash uchun
               headers: { "Content-Type": "application/json" },
@@ -308,7 +308,7 @@
 
           try {
             const res = await fetch(
-              "http://bogcha.infinityfreeapp.com/forgot_password.php",
+              "https://bogcha.infinityfreeapp.com/forgot_password.php",
               {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
