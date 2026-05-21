@@ -80,9 +80,13 @@ async def contact_received(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Backend ga yuborish — chat_id ni saqlash
     try:
         response = requests.post(
-            f"{API_BASE}/save_telegram.php",
-            json={"phone": phone, "chat_id": chat_id},
-            timeout=10
+    f"{API_BASE}/save_telegram.php",
+    json={"phone": phone, "chat_id": chat_id},
+    timeout=10
+)
+
+logger.error("STATUS: %s", response.status_code)
+logger.error("BODY: %s", response.text)
         )
         data = response.json()
 
