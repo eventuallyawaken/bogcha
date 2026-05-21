@@ -28,7 +28,7 @@ from telegram.ext import (
 BOT_TOKEN = "8615527855:AAHqCQ8FqpCNAaE44bUJKMlsothE0-B3_JI"
 
 # 🌐 Sayt backend manzili (XAMPP da localhost, serverda domain)
-API_BASE = "http://localhost/bogcha/backend"
+API_BASE = "https://bogcha.infinityfreeapp.com/bot"
 
 # ============================================================
 # Logging
