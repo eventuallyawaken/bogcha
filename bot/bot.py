@@ -70,30 +70,28 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ============================================================
 async def contact_received(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contact = update.message.contact
-    phone   = contact.phone_number
+    phone = contact.phone_number
     chat_id = update.effective_chat.id
 
-    # Telefon raqamni normallashtirish
     if not phone.startswith('+'):
         phone = '+' + phone
 
-    # Backend ga yuborish — chat_id ni saqlash
     try:
         response = requests.post(
-    f"{API_BASE}/save_telegram.php",
-    json={"phone": phone, "chat_id": chat_id},
-    timeout=10
-     
-
-    logger.error("STATUS: %s", response.status_code)
-    logger.error("BODY: %s", response.text)
+            f"{API_BASE}/save_telegram.php",
+            json={"phone": phone, "chat_id": chat_id},
+            timeout=10
         )
+
+        logger.info("STATUS: %s", response.status_code)
+        logger.info("BODY: %s", response.text)
+
         data = response.json()
 
         if data.get("success"):
             parent_name = data.get("name", "")
-            child_name  = data.get("child_name", "")
-            group_name  = data.get("group_name", "")
+            child_name = data.get("child_name", "")
+            group_name = data.get("group_name", "")
 
             await update.message.reply_text(
                 f"✅ <b>Muvaffaqiyatli ulandi!</b>\n\n"
@@ -113,6 +111,7 @@ async def contact_received(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Iltimos admin bilan bog'laning:\n"
                 "📞 +998 90 123-45-67"
             )
+
     except Exception as e:
         logger.error(f"save_telegram xatosi: {e}")
         await update.message.reply_text(
